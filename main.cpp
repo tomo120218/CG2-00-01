@@ -47,17 +47,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// ウィンドウの生成
 	HWND hwnd = CreateWindow(
-		wc.lpszClassName,// 利用するクラス名
-		L"CG2",// タイトルバーの文字
-		WS_OVERLAPPEDWINDOW,// よく見るウィンドウスタイル
-		CW_USEDEFAULT,// 表示X座標(Windowに任せる)
-		CW_USEDEFAULT,// 表示y座標(WindowOSに任せる)
-		wrc.right - wrc.left,// ウィンドウ横幅
-		wrc.bottom - wrc.top,// ウィンドウ縦幅
-		nullptr,// 親ウィンドウハンドル
-		nullptr,// メニューハンドル
-		wc.hInstance,// インスタンスハンドル
-		nullptr);// オプション
+		wc.lpszClassName,       // 利用するクラス名
+		L"CG2",                 // タイトルバーの文字
+		WS_OVERLAPPEDWINDOW,    // よく見るウィンドウスタイル
+		CW_USEDEFAULT,          // 表示X座標(Windowに任せる)
+		CW_USEDEFAULT,          // 表示y座標(WindowOSに任せる)
+		wrc.right - wrc.left,   // ウィンドウ横幅
+		wrc.bottom - wrc.top,   // ウィンドウ縦幅
+		nullptr,                // 親ウィンドウハンドル
+		nullptr,                // メニューハンドル
+		wc.hInstance,           // インスタンスハンドル
+		nullptr);               // オプション
 
 	// ウィンドウを表示する
 	ShowWindow(hwnd, SW_SHOW);
