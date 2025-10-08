@@ -931,8 +931,42 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	inputLayOutDesc.pInputElementDescs = inputElementDesc;
 	inputLayOutDesc.NumElements = _countof(inputElementDesc);
 
+	enum BlendMode {
+		// ブレンドなし
+		kBlendModeNone,
+		// 通常のブレンド（デフォルト）
+		// Src * SrcA + Dest * (1 - SrcA)
+		kBlendModeNormal,
+		// 加算: Src * SrcA + Dest * 1
+		kBlendModeAdd,
+		// 減算: Dest * 1 - Src * SrcA
+		kBlendModeSubtract,
+		// 乗算: Src * 0 + Dest * Src
+		kBlendModeMultiply,
+		// スクリーン: Src * (1 - Dest) + Dest * 1
+		kBlendModeScreen,
+		// 利用してはいけない（終端用）
+		kCountOfBlendMode,
+	};
+
 	D3D12_BLEND_DESC blendDesc{};
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+	blendDesc.RenderTarget[0].BlendEnable = TRUE;
+	blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+	blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+	blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
+	blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
+	blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+
+	//output.color = gMaterial.color * textureColor * gDirectionalLight.color * cos * gDirectionalLight.intensity;
+	//// RGB
+	//output.color.rgb = gMaterial.color.rgb * textureColor.rgb *
+	//	gDirectionalLight.color.rgb * cos *
+	//	gDirectionalLight.intensity;
+
+	// Alpha
+	//output.color.a = gMaterial.color.a * textureColor.a;
 
 	//RasiterzerStateの設定
 	D3D12_RASTERIZER_DESC rastrizeDesc{};
