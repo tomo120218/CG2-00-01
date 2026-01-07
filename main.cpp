@@ -964,6 +964,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//DSVHeapの先頭にDSVを作る
 	device->CreateDepthStencilView(depthStencilResource, &dsvDesc, dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
 
+	//球表示用
+	const uint32_t kSubdivision = 12;
+	const uint32_t kNumSphereVertices = kSubdivision * kSubdivision * 6;
+	float pi = std::numbers::pi_v<float>;
 
 	//Sprite用の頂点リソースを作る
 	ID3D12Resource* vertexResourceSprite = CreateBufferResource(device, sizeof(VertexData) * 6);
