@@ -108,37 +108,6 @@ struct TransformationMatrix
 	Matrix4x4 World;
 };
 
-struct Particle
-{
-	Transform transform;
-	Vector3 velocity;
-};
-
-//代入演算子オーバーロード
-//Vector3足し算
-Vector3& operator+=(Vector3& lhv, const Vector3& rhv)
-{
-	lhv.x += rhv.x;
-	lhv.y += rhv.y;
-	lhv.z += rhv.z;
-	return lhv;
-}
-
-//Vector3の掛け算
-Vector3& operator*=(Vector3& v, float s)
-{
-	v.x *= s;
-	v.y *= s;
-	v.z *= s;
-	return v;
-}
-
-const Vector3 operator*(const Vector3& v, float s)
-{
-	Vector3 temp(v);
-	return temp *= s;
-}
-
 // 単位行列
 Matrix4x4 MakeIdentity4x4() {
 	Matrix4x4 identity{};
@@ -1273,7 +1242,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//単位行列を書き込んでおく
 	*transformationMatrixDataSprite = MakeIdentity4x4();
 
-	Transform particlesprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+	Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
 	//頂点インデックス
 	ID3D12Resource* indexResourceSprite = CreateBufferResource(device, sizeof(uint32_t) * 6);
@@ -1328,11 +1297,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	/*device->CreateShaderResourceView(instancingResource.Get(), &instancingSrvDesc, instancingSrvHandleCPU);*/
 	device->CreateShaderResourceView(instancingResource, &instancingSrvDesc, instancingSrvHandleCPU);
 
-	Particle particles[kNumInstance];
+	Transform transforms[kNumInstance];
 	for (uint32_t index = 0; index < kNumInstance; ++index) {
-		particles[index].transform.scale = { 1.0f, 1.0f, 1.0f };
-		particles[index].transform.rotate = { 0.0f, 0.0f, 0.0f };
-		particles[index].transform.translate = { index * 0.1f, index * 0.1f, index * 0.1f };
+		transforms[index].scale = { 1.0f, 1.0f, 1.0f };
+		transforms[index].rotate = { 0.0f, 0.0f, 0.0f };
+		transforms[index].translate = { index * 0.1f, index * 0.1f, index * 0.1f };
 	}
 
 	MSG msg{};
@@ -1349,7 +1318,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//ゲームの処理
 
 			//Sprite用のWorldViewProjectionMatrixを作る
-			Matrix4x4 worldMatrixSprite = MakeAffineMatrix(particlesprite.scale, particlesprite.rotate, particlesprite.translate);
+			Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
 			Matrix4x4 viewMatrixSprite = MakeIdentity4x4();
 			Matrix4x4 projectionMatrixSprite = MakeOrthographicMatrix(0.0f, 0.0f, float(kClientWidth), float(kClientHeight), 0.0f, 100.0f);
 			Matrix4x4 worldViewProjectionMatrixSprite = Multiply(worldMatrixSprite, Multiply(viewMatrixSprite, projectionMatrixSprite));
@@ -1375,7 +1344,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			for (uint32_t index = 0; index < kNumInstance; ++index) {
 				Matrix4x4 worldMatrix =
-					MakeAffineMatrix(particles[index].transform.scale, particles[index].transform.rotate, particles[index].transform.translate);
+					MakeAffineMatrix(transforms[index].scale, transforms[index].rotate, transforms[index].translate);
 				Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, viewProjectionMatrix);
 				instancingData[index].WVP = worldViewProjectionMatrix;
 				instancingData[index].World = worldMatrix;
@@ -1388,7 +1357,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::ColorEdit4("material", &materialData->x, ImGuiColorEditFlags_AlphaPreview);
 			ImGui::DragFloat("rotate.y", &transform.rotate.y, 0.1f);
 			ImGui::DragFloat3("transform", &transform.translate.x, 0.1f);
-			ImGui::DragFloat2("Sprite transform", &particlesprite.translate.x, 1.0f);
+			ImGui::DragFloat2("Sprite transform", &transformSprite.translate.x, 1.0f);
 			ImGui::End();
 
 			ImGui::Render();
@@ -1458,7 +1427,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 			//モデル描画
-
 			commandList->DrawInstanced(UINT(modelData.vertices.size()), kNumInstance, 0, 0);
 
 
