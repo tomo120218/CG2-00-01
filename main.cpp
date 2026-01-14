@@ -263,6 +263,25 @@ Matrix4x4 Inverse(const Matrix4x4& m) {
 	return result;
 }
 
+// 内積
+float Dot(const Vector3& v1, const Vector3& v2) {
+	return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+}
+
+// 長さ
+float Length(const Vector3& v) {
+	return std::sqrt(Dot(v, v));
+}
+
+// 正規化
+Vector3 Normalize(const Vector3& v) {
+	float length = Length(v);
+	if (length == 0.0f) {
+		return v;
+	}
+	return { v.x / length, v.y / length, v.z / length };
+}
+
 Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float bottom, float nearClip, float farClip)
 {
 	return{
@@ -1196,7 +1215,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::Begin("Settings");
 			ImGui::ColorEdit4("material", &materialData->color.x, ImGuiColorEditFlags_AlphaPreview);
 			ImGui::Checkbox("useMonsterBall", &useMonsterBall);
+			ImGui::DragFloat3("Light", &directionalLightData->direction.x, 0.01f, -1.0f, 1.0f);
 			ImGui::End();
+
+			// 方向は正規化
+			directionalLightData->direction = Normalize(directionalLightData->direction);
 
 			ImGui::Render();
 
@@ -1242,6 +1265,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
 			commandList->SetGraphicsRootDescriptorTable(2, useMonsterBall ? textureSrvHandleGPU2 : textureSrvHandleGPU);;
 
+			// DirectionalLightのCBufferの場所を設定
+			commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
+
 			commandList->DrawInstanced(kNumSphereVertices, 1, 0, 0);
 
 			//Spriteの描画。変更が必要なものだけ変更する
@@ -1251,8 +1277,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//TransformationMatrixCBufferの場所を設定
 			commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
 			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
-			// DirectionalLightのCBufferの場所を設定
-			commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
+			
+
 			//描画！(DrawCall/ドローコール)
 			commandList->DrawInstanced(6, 1, 0, 0);
 
